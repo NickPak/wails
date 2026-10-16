@@ -1764,12 +1764,15 @@ func (w *linuxWebviewWindow) setOpacity(opacity float64) {
 	C.gtk_widget_set_opacity(w.gtkWidget(), C.double(opacity))
 }
 
+// setTitle always writes the window title, even for frameless windows:
+// frameless only suppresses the drawn titlebar, but WM_NAME is still
+// what window lists, taskbars and Alt+Tab switchers display. Skipping
+// this left such windows showing GTK's default title — the program
+// name (usually the application id) instead of the app name.
 func (w *linuxWebviewWindow) setTitle(title string) {
-	if !w.parent.options.Frameless {
-		cTitle := C.CString(title)
-		C.gtk_window_set_title(w.gtkWindow(), cTitle)
-		C.free(unsafe.Pointer(cTitle))
-	}
+	cTitle := C.CString(title)
+	C.gtk_window_set_title(w.gtkWindow(), cTitle)
+	C.free(unsafe.Pointer(cTitle))
 }
 
 func (w *linuxWebviewWindow) setIcon(icon pointer) {
